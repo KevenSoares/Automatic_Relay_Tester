@@ -62,6 +62,7 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 void writeMemo(uint8_t date, uint16_t adress, int i);
 uint8_t readMemo(uint16_t adress,int i);
+void EXTI15_10_IRQHandler(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -76,9 +77,7 @@ uint8_t readMemo(uint16_t adress,int i);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	contInitView = readMemo(0,4);
-	contInit++;
-    writeMemo(contInit,0,4);
+
   /* USER CODE END 1 */
   
 
@@ -104,7 +103,9 @@ int main(void)
   MX_SPI1_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-
+	contInitView = readMemo(0,4);
+	contInit++;
+    writeMemo(contInit,0,4);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -125,22 +126,7 @@ int main(void)
 	  writeMemo(contOff,9,4);
 	  HAL_Delay(1000);
 
-	  if(HAL_GPIO_ReadPin(GPIOA,B1_Pin) == 0)
-	  {
-		  while(HAL_GPIO_ReadPin(GPIOA,B1_Pin) == 0);
-		  contInitView = readMemo(0,4);
-		  uint8_t bufferOut1[10];
-		  sprintf(bufferOut1,"%d",contInitView);
-		  HAL_UART_Transmit(&huart1,bufferOut1,10,1);
-		  contOnView = readMemo(5,4);
-		  uint8_t bufferOut2[10];
-		  sprintf(bufferOut2,"%d",contOnView);
-		  HAL_UART_Transmit(&huart1,bufferOut2,10,1);
-		  contOffView = readMemo(9,4);
-		  uint8_t bufferOut3[10];
-		  sprintf(bufferOut3,"%d",contOffView);
-		  HAL_UART_Transmit(&huart1,bufferOut3,10,1);
-	  }
+
   }
   /* USER CODE END 3 */
 }
@@ -194,7 +180,28 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    if ( GPIO_Pin == B1_Pin)
+    {
+    	  if(HAL_GPIO_ReadPin(GPIOA,B1_Pin) == 0)
+    	  {
+    	  	  while(HAL_GPIO_ReadPin(GPIOA,B1_Pin) == 0);
+    	  	  contInitView = readMemo(0,4);
+    	  	  uint8_t bufferOut1[10];
+    	  	  sprintf(bufferOut1,"%d",contInitView);
+    	  	  HAL_UART_Transmit(&huart1,bufferOut1,10,1);
+    	  	  contOnView = readMemo(5,4);
+    	  	  uint8_t bufferOut2[10];
+    	  	  sprintf(bufferOut2,"%d",contOnView);
+    	  	  HAL_UART_Transmit(&huart1,bufferOut2,10,1);
+    	  	  contOffView = readMemo(9,4);
+    	  	  uint8_t bufferOut3[10];
+    	  	  sprintf(bufferOut3,"%d",contOffView);
+    	  	  HAL_UART_Transmit(&huart1,bufferOut3,10,1);
+    	  }
+    }
+}
 void writeMemo(uint8_t date, uint16_t adress, int i)
 {
 	   uint8_t bufferOut[4];

@@ -28,6 +28,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "stm32g4xx_hal_pwr.h"
+#include "stdio.h"
+#include "string.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,7 +52,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-int contOn = 0, contOff = 0, contInit;
+int contOn = 0, contOff = 0, contInit, contInitView = 0, contOnView = 0, contOffView = 0;
 uint8_t dadoOut[256];
 
 /* USER CODE END PV */
@@ -73,6 +76,7 @@ uint8_t readMemo(uint16_t adress,int i);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+	contInitView = readMemo(0,4);
 	contInit++;
     writeMemo(contInit,0,4);
   /* USER CODE END 1 */
@@ -120,6 +124,23 @@ int main(void)
 	  contOff++;
 	  writeMemo(contOff,9,4);
 	  HAL_Delay(1000);
+
+	  if(HAL_GPIO_ReadPin(GPIOA,B1_Pin) == 0)
+	  {
+		  while(HAL_GPIO_ReadPin(GPIOA,B1_Pin) == 0);
+		  contInitView = readMemo(0,4);
+		  uint8_t bufferOut1[10];
+		  sprintf(bufferOut1,"%d",contInitView);
+		  HAL_UART_Transmit(&huart1,bufferOut1,10,1);
+		  contOnView = readMemo(5,4);
+		  uint8_t bufferOut2[10];
+		  sprintf(bufferOut2,"%d",contOnView);
+		  HAL_UART_Transmit(&huart1,bufferOut2,10,1);
+		  contOffView = readMemo(9,4);
+		  uint8_t bufferOut3[10];
+		  sprintf(bufferOut3,"%d",contOffView);
+		  HAL_UART_Transmit(&huart1,bufferOut3,10,1);
+	  }
   }
   /* USER CODE END 3 */
 }
